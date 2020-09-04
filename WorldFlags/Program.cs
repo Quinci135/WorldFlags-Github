@@ -2,7 +2,7 @@
 using TShockAPI;
 using Terraria;
 using TerrariaApi.Server;
-
+using Terraria.ID;
 
 namespace WorldFlags
 {
@@ -31,7 +31,7 @@ namespace WorldFlags
 		{
 			if (disposing)
 			{
-
+				
 			}
 			base.Dispose(disposing);
 		}
@@ -47,7 +47,17 @@ namespace WorldFlags
 			{
 				case "ftw":
 				case "for the worthy":
+					foreach(Projectile projectile in Main.projectile)
+					{
+						if (projectile.type == ProjectileID.BombSkeletronPrime) // 102
+						{
+							projectile.active = false;
+							projectile.type = 0;
+							NetMessage.SendData((int)PacketTypes.ProjectileNew, -1, -1, null, projectile.identity);
+						}
+					}
 					Main.getGoodWorld = !Main.getGoodWorld;
+					TSPlayer.All.SendData(PacketTypes.WorldInfo);
 					args.Player.SendSuccessMessage($"For the Worthy " + (Main.getGoodWorld ? "enabled." : "disabled."));
 					break;
 				case "drunk":
@@ -55,10 +65,11 @@ namespace WorldFlags
 				case "05162020":
 				case "5162020":
 					Main.drunkWorld = !Main.drunkWorld;
+					TSPlayer.All.SendData(PacketTypes.WorldInfo);
 					args.Player.SendSuccessMessage($"Drunk world " + (Main.drunkWorld ? "enabled." : "disabled."));
 					break;
 				default:
-					args.Player.SendInfoMessage($"[ChangeFlag] Current flag status:\nFor The Worthy(ftw): {Main.getGoodWorld}\nDrunk World(5162020 seed): {Main.drunkWorld}\nCommand usage: {TShock.Config.CommandSpecifier}changeflag <flag|>");
+					args.Player.SendInfoMessage($"[ChangeFlag] Current flag status:\nFor The Worthy(ftw): {Main.getGoodWorld}\nDrunk World(5162020 seed): {Main.drunkWorld}\nCommand usage: {TShock.Config.CommandSpecifier}changeflag <flag>");
 					break;
 			}
 		}
